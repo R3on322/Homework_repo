@@ -1,0 +1,166 @@
+From c6b82a6eb832f8b2198d6af358e329baaa2023f8 Mon Sep 17 00:00:00 2001
+From: Aleks <kindeer123@mail.ru>
+Date: Thu, 15 Mar 1956 00:17:25 +0300
+Subject: qq
+
+---
+ .../backend/product/dao/ProductDaoImpl.java   | 20 +++++++++--------
+ .../db/migration/init/V2__create_tables.sql   | 22 +++++++++----------
+ .../app/main-page/main-page.component.html    |  4 ++--
+ .../product-card/product-card.component.html  |  8 ++++---
+ .../products/product/product.component.html   |  2 +-
+ 5 files changed, 30 insertions(+), 26 deletions(-)
+
+diff --git a/backend/src/main/java/com/eshop/backend/product/dao/ProductDaoImpl.java b/backend/src/main/java/com/eshop/backend/product/dao/ProductDaoImpl.java
+index 192ad1e8..c9c69fc1 100644
+--- a/backend/src/main/java/com/eshop/backend/product/dao/ProductDaoImpl.java
++++ b/backend/src/main/java/com/eshop/backend/product/dao/ProductDaoImpl.java
+@@ -186,17 +186,19 @@ public List<String> getCategoriesOfProduct(int author, int coverType, int genre,
+ 
+     @Override
+     public List<ProductModel> getPopular(int page, int size) {
+-        String sql = "SELECT ";
+-
+-//        String sql = ProductMapper.SELECT_SQL + " order by p." + orderBy +
+-//                " OFFSET " + (page - 1) + " ROWS FETCH NEXT " + size + " ROWS ONLY";
+-//        return template.query(sql, new ProductMapper());
+-        return null;
++        String sql = ProductMapper.SELECT_SQL +
++                "WHERE p.productamount > 0 AND p.id IN (SELECT productid FROM orderproduct " +
++                "INNER JOIN ordercart ON orderproduct.ordercardid = ordercart.id " +
++                "WHERE ordercart.orderstatus = 'DELIVERED' " +
++                "GROUP BY productid " +
++                "ORDER BY SUM(incardproductamount) DESC " +
++                " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY) ";
++        return template.query(sql, new ProductMapper(), new Object[]{(page - 1), size});
+     }
+ 
+     @Override
+     public List<ProductModel> getNew(int page, int size) {
+-        String sql = ProductMapper.SELECT_SQL + " order by p.productdate desc " +
++        String sql = ProductMapper.SELECT_SQL + " WHERE p.productstatus = 'ACTIVE' AND p.productamount > 0 order by p.productdate desc " +
+                 " OFFSET ? ROWS FETCH NEXT ? ROWS ONLY";
+         return template.query(sql, new ProductMapper(), new Object[]{(page - 1), size});
+     }
+@@ -241,9 +243,9 @@ private Object[] getSearchedOrderedFilteredBuilder(String search, FilterModel fi
+ 
+         if (isActive){
+             if (search.equals("")){
+-                sql.append(" WHERE p.productstatus = 'ACTIVE' ");
++                sql.append(" WHERE p.productstatus = 'ACTIVE' AND p.productamount > 0 ");
+             } else {
+-                sql.append(" AND p.productstatus = 'ACTIVE' ");
++                sql.append(" AND p.productstatus = 'ACTIVE' AND p.productamount > 0 ");
+             }
+         }
+ 
+diff --git a/backend/src/main/resources/db/migration/init/V2__create_tables.sql b/backend/src/main/resources/db/migration/init/V2__create_tables.sql
+index 77dd7da9..101a5536 100644
+--- a/backend/src/main/resources/db/migration/init/V2__create_tables.sql
++++ b/backend/src/main/resources/db/migration/init/V2__create_tables.sql
+@@ -22,15 +22,15 @@ INSERT INTO PUBLISHER (ID, PUBLISHERNAME) VALUES ('1', 'PUBLISHER2');
+ INSERT INTO PRODUCT (ID, PRODUCTNAME, PRODUCTAMOUNT, PRODUCTPRICE, PRODUCTDISCOUNT, PRODUCTDATE,
+                      PRODUCTPICT, PRODUCTDESCRIPTION, PRODUCTSTATUS, GENRE, COVERTYPE, AUTHOR, LANGUAGE, PUBLISHER)
+                      VALUES ('0', 'BIGBOOK', '100', '100', '0', TO_DATE('2021-06-02 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
+-                             'TESTURL', 'TESTDESC', 'T', '0', '0', '0', '0', '0');
++                             'TESTURL', 'TESTDESC', 'INACTIVE', '0', '0', '0', '0', '0');
+ INSERT INTO PRODUCT (ID, PRODUCTNAME, PRODUCTAMOUNT, PRODUCTPRICE, PRODUCTDISCOUNT, PRODUCTDATE,
+                      PRODUCTPICT, PRODUCTDESCRIPTION, PRODUCTSTATUS, GENRE, COVERTYPE, AUTHOR, LANGUAGE, PUBLISHER)
+-VALUES ('9990', 'BIGBOOK', '100', '100', '0', TO_DATE('2021-06-02 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
+-        'TESTURL', 'TESTDESC', 'T', '1', '1', '1', '1', '1');
++VALUES ('9990', 'BIGBOOK', '100', '100', '0', TO_DATE('2021-06-03 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
++        'TESTURL', 'TESTDESC', 'INACTIVE', '1', '1', '1', '1', '1');
+ INSERT INTO PRODUCT (ID, PRODUCTNAME, PRODUCTAMOUNT, PRODUCTPRICE, PRODUCTDISCOUNT, PRODUCTDATE,
+                      PRODUCTPICT, PRODUCTDESCRIPTION, PRODUCTSTATUS, GENRE, COVERTYPE, AUTHOR, LANGUAGE, PUBLISHER)
+-VALUES ('9992', 'Harry Potter', '20', '200', '0', TO_DATE('2021-06-02 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
+-        'https://images.penguinrandomhouse.com/cover/9780739360385', 'TESTDESC', 'T', '1', '0', '1', '1', '1');
++VALUES ('9992', 'Harry Potter', '20', '200', '0', TO_DATE('2021-06-04 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
++        'https://images.penguinrandomhouse.com/cover/9780739360385', 'TESTDESC', 'ACTIVE', '1', '0', '1', '1', '1');
+ 
+ INSERT INTO ORDERCART (ID, USERID, COURIERID, PACKAGEDESCRIPTION, ORDERSTATUS, TOTALPRICE, USERNAME, DELIVERYTIME,  FULLADDRESS, DONTDISTURB) VALUES ('0', '9993', '9992', 'testDescription', 'DELIVERED', '100', 'USER0', TO_DATE('2021-06-02 23:20:43', 'YYYY-MM-DD HH24:MI:SS'), 'USER0STREET', 'T' );
+ 
+@@ -42,19 +42,19 @@ VALUES (9992 , 0, 9, TO_DATE('2021-06-02 23:39:34', 'YYYY-MM-DD HH24:MI:SS'));
+ 
+ INSERT INTO PRODUCT (ID, PRODUCTNAME, PRODUCTAMOUNT, PRODUCTPRICE, PRODUCTDISCOUNT, PRODUCTDATE,
+                      PRODUCTPICT, PRODUCTDESCRIPTION, PRODUCTSTATUS, GENRE, COVERTYPE, AUTHOR, LANGUAGE, PUBLISHER)
+-VALUES ('9993', 'War and Peace', '20', '200', '0', TO_DATE('2021-06-02 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
+-        'https://images-na.ssl-images-amazon.com/images/I/A1aDb5U5myL.jpg', 'TESTDESC', 'T', '1', '0', '1', '1', '1');
++VALUES ('9993', 'War and Peace', '20', '200', '0', TO_DATE('2021-06-06 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
++        'https://images-na.ssl-images-amazon.com/images/I/A1aDb5U5myL.jpg', 'TESTDESC', 'ACTIVE', '1', '0', '1', '1', '1');
+ 
+ INSERT INTO PRODUCT (ID, PRODUCTNAME, PRODUCTAMOUNT, PRODUCTPRICE, PRODUCTDISCOUNT, PRODUCTDATE,
+                      PRODUCTPICT, PRODUCTDESCRIPTION, PRODUCTSTATUS, GENRE, COVERTYPE, AUTHOR, LANGUAGE, PUBLISHER)
+-VALUES ('9994', 'In Search of Lost Time', '20', '200', '0', TO_DATE('2021-06-02 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
+-        'https://m.media-amazon.com/images/I/411fuVxxG4L.jpg', 'TESTDESC', 'T', '1', '0', '1', '1', '1');
++VALUES ('9994', 'In Search of Lost Time', '20', '200', '0', TO_DATE('2021-06-05 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
++        'https://m.media-amazon.com/images/I/411fuVxxG4L.jpg', 'TESTDESC', 'ACTIVE', '1', '0', '1', '1', '1');
+ 
+ 
+ INSERT INTO PRODUCT (ID, PRODUCTNAME, PRODUCTAMOUNT, PRODUCTPRICE, PRODUCTDISCOUNT, PRODUCTDATE,
+                      PRODUCTPICT, PRODUCTDESCRIPTION, PRODUCTSTATUS, GENRE, COVERTYPE, AUTHOR, LANGUAGE, PUBLISHER)
+-VALUES ('9995', 'The Ambassadors', '20', '200', '0', TO_DATE('2021-06-02 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
+-        'https://images-na.ssl-images-amazon.com/images/I/51xBnzWibyL._SX310_BO1,204,203,200_.jpg', 'TESTDESC', 'T', '1', '0', '1', '1', '1');
++VALUES ('9995', 'The Ambassadors', '20', '200', '0', TO_DATE('2021-06-10 23:39:34', 'YYYY-MM-DD HH24:MI:SS'),
++        'https://images-na.ssl-images-amazon.com/images/I/51xBnzWibyL._SX310_BO1,204,203,200_.jpg', 'TESTDESC', 'ACTIVE', '1', '0', '1', '1', '1');
+ 
+ 
+ 
+diff --git a/frontend/src/app/main-page/main-page.component.html b/frontend/src/app/main-page/main-page.component.html
+index 555fa0ad..d1f30c6a 100644
+--- a/frontend/src/app/main-page/main-page.component.html
++++ b/frontend/src/app/main-page/main-page.component.html
+@@ -23,7 +23,7 @@
+ <div class="container">
+   <div class="row justify-content-around mt-4 mb-4">
+ 
+-      <div class="container mt-5">
++      <div class="container mt-5" *ngIf="newProducts.length>0">
+         <h2 class="text-center p-1">New products in Shop</h2>
+         <div class="row justify-content-around mt-4">
+           <div class="col-md-3 col-sm-6 mb-4" *ngFor="let product of newProducts">
+@@ -32,7 +32,7 @@ <h2 class="text-center p-1">New products in Shop</h2>
+           </div>
+         </div>
+       </div>
+-      <div class="container mt-5">
++      <div class="container mt-5" *ngIf="popularProducts.length>0">
+         <h2 class="text-center p-1">The most popular products in Shop</h2>
+         <div class="row justify-content-around mt-4">
+           <div class="col-md-3 col-sm-6 mb-4" *ngFor="let product of popularProducts">
+diff --git a/frontend/src/app/products/product-card/product-card.component.html b/frontend/src/app/products/product-card/product-card.component.html
+index 382500bf..e22dfa50 100644
+--- a/frontend/src/app/products/product-card/product-card.component.html
++++ b/frontend/src/app/products/product-card/product-card.component.html
+@@ -18,14 +18,16 @@
+             <p>Price:
+               <span class="has-discount-text">
+                 ${{getDiscountedPrice()}}
+-              </span>
++            </span>
+             </p>
+           </div>
+ 
+         </div>
+         <div class="col-sm-6">
+-          <a *ngIf="product.productStatus === 'inCard'" routerLink="/shopping-cart" class="btn btn-secondary text-white">Already in cart</a>
+-          <a *ngIf="product.productStatus !== 'inCard'" (click)="addToCart()"  class="btn btn-secondary text-white">Add to cart</a>
++          <a *ngIf="product.productStatus === 'inCard'" routerLink="/shopping-cart"
++             class="btn btn-secondary text-white">Already in cart</a>
++          <a *ngIf="product.productStatus !== 'inCard'" (click)="addToCart()" class="btn btn-secondary text-white">Add
++            to cart</a>
+         </div>
+       </div>
+     </div>
+diff --git a/frontend/src/app/products/product/product.component.html b/frontend/src/app/products/product/product.component.html
+index d9506fe1..74f1c8f4 100644
+--- a/frontend/src/app/products/product/product.component.html
++++ b/frontend/src/app/products/product/product.component.html
+@@ -3,7 +3,7 @@
+     <div class="row justify-content-around mt-4">
+       <div class="col-md-4">
+         <div class="text-center mb-5">
+-          <img class="card-img-top rounded img" [src]="product.productPict" alt="First slide">
++          <img class="card-img-top rounded img" [src]="product.productPict" alt="">
+         </div>
+         <table class="table table-sm">
+           <tbody>
