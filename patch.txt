@@ -1,7 +1,7 @@
 From c6b82a6eb832f8b2198d6af358e329baaa2023f8 Mon Sep 17 00:00:00 2001
-From: Aleks <kindeer123@mail.ru>
-Date: Thu, 15 Mar 1956 00:17:25 +0300
-Subject: qq
+From: Oleg <Oleg322@ya.ru>
+Date: Fri, 22 May 1964 03:17:24 +0300
+Subject: Oleg_322_tashi
 
 ---
  .../backend/product/dao/ProductDaoImpl.java   | 20 +++++++++--------
