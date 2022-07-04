@@ -2,7 +2,7 @@ import re
 from randomtimestamp import randomtimestamp
 import time
 
-def chek_phone(number):
+def check_phone(number):
     try:
         num_ok = re.match(r'^([0-9]{2,4})[-, ]{0,1}([\d]{7})$', number)
         num_ok.group()
