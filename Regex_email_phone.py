@@ -2,11 +2,15 @@ import re
 from randomtimestamp import randomtimestamp
 import time
 
-# def chek_phone(number):
-#     num_ok = re.match(r'([0-9]{3})([\d-]{7})', number)
-#     print(num_ok.group())
-# num = 9162256413
-# chek_phone(str(num))
+def chek_phone(number):
+    try:
+        num_ok = re.match(r'^([0-9]{2,4})[-, ]{0,1}([\d]{7})$', number)
+        num_ok.group()
+        return True
+    except AttributeError:
+        return False
+# num = str(input())
+# print(chek_phone(num))
 
 def chek_mail(email):
     try:
