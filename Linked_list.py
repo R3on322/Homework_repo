@@ -1,76 +1,161 @@
-class Linked_list:
+class Node:
+
+    def __init__(self, val, next=None):
+        self.val = val
+        self.next = next
+
+    def __str__(self):
+        return f'[{self.val}]->{self.next}'
+
+
+class LinkedList:
 
     def __init__(self):
-        self.data = []
+        self.head = None
 
     def __repr__(self):
-        return ' '.join(self.data)
+        return str(self.head)
 
     def add(self, elem) -> list:
-        self.data.append(elem)
+        if not self.head:
+            self.head = Node(elem)
+            return elem
 
+        node = self.head
+        while node.next:
+            node = node.next
+
+        node.next = Node(elem)
 
     def insert(self, elem, index) -> list:
-        try:
-            self.data[index] = elem
-        except IndexError:
-            print('There is no such index in the list!')
+        count = 0
+        node = self.head
+        prev_node = self.head
+        while count != index:
+            prev_node = node
+            node = node.next
+            count += 1
+        if count == 0:
+            self.add(elem)
+        else:
+            prev_node.next = Node(elem, next=node)
 
-    def pop(self, index=-1):
-        return self.data.pop(index)
+    def pop(self):
+        node = self.head
+        prev_node = self.head
+        if self.size() != 0:
+            if self.size() > 1:
+                while node.next:
+                    prev_node = node
+                    node = node.next
+                prev_node.next = None
+                return node.val
+            else:
+                self.head = None
+                return node.val
+        else:
+            return f'List is empty!'
 
     def remove(self, index) -> list:
-        self.pop(index)
+        count = 0
+        node = self.head
+        prev_node = self.head
+        while count != index:
+            prev_node = node
+            node = node.next
+            count += 1
+
+        if count == 0:
+            self.head = self.head.next
+
+        prev_node.next = node.next
 
     def clear(self) -> list:
-        self.data = []
+        self.head = None
 
     def get(self, index):
-        return self.data[index]
+        count = 0
+        node = self.head
+        if self.size() >= 1:
+            while count != index:
+                node = node.next
+                count += 1
+            return node.val
+        else:
+            return f'List is empty!'
 
     def get_first(self):
-        return self.get(0)
+        if self.size() >= 1:
+            return self.head.val
+        else:
+            return f'List is empty!'
 
     def get_last(self):
-        return self.get(-1)
+        if self.size() >= 1:
+            return self.pop()
+        else:
+            return f'List is empty!'
 
     def is_empty(self) -> bool:
         return True if self.size() == 0 else False
 
-    def add_all(self, other_list: 'Linked_list') -> list:
-        self.data.extend(other_list)
+    def add_all(self, other_list: 'LinkedList') -> list:
+        for elem in other_list:
+            self.add(elem)
 
     def size(self) -> int:
-        return len(self.data)
+        count = 0
+        current = self.head
+        while current:
+            count += 1
+            current = current.next
+        return count
 
     def contains(self, elem) -> bool:
-        return True if elem in self.data else False
+        node = self.head
 
-    # def to_list(self) -> list:
-    #     new_data = self.data
-    #     return new_data
+        while node.next:
+            if node.val == elem:
+                return True
+            else:
+                node = node.next
+
+        if node.val == elem:
+            return True
+        else:
+            return False
+
+    def to_list(self) -> list:
+        node_list = []
+        node = self.head
+        if self.size() > 1:
+            while node.next:
+                node_list.append(node.val)
+                node = node.next
+            node_list.append(node.val)
+            return node_list
+        else:
+            if self.size() == 1:
+                node_list.append(node.val)
+            return node_list
 
     def index_of(self, elem) -> int:
-        if self.contains(elem) == True:
-            return self.data.index(elem)
+        if self.size() != 0 and self.contains(elem):
+            count = 0
+            node = self.head
+            while node.next:
+                if node.val == elem:
+                    return count
+                count += 1
+                node = node.next
+            return count
         else:
-            return 'No such item in the list!'
+            return f'There is no such element or list is empty!'
 
 
-other_list = ['11', '12', '13', '14']
-lin_list = Linked_list()
-lin_list.add('a')
-lin_list.add('1')
-lin_list.add('b')
-lin_list.add('c')
-lin_list.add('2')
-lin_list.add('3')
-lin_list.add('d')
-lin_list.add('e')
-lin_list.add('f')
-lin_list.add('g')
-print(lin_list)
-print(lin_list.size())
-lin_list.add_all(other_list)
-print(lin_list)
-print(lin_list.size())
+other_list = [11, 12, 13, 14, 15]
+linked_list = LinkedList()
+linked_list.add(100000)
+print(linked_list.size())
+print(linked_list)
+print(linked_list.to_list())
