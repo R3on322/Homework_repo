@@ -54,7 +54,7 @@ class LinkedList:
                 self.head = None
                 return node.val
         else:
-            return f'List is empty!'
+            return None
 
     def remove(self, index) -> list:
         count = 0
@@ -82,26 +82,30 @@ class LinkedList:
                 count += 1
             return node.val
         else:
-            return f'List is empty!'
+            return None
 
     def get_first(self):
         if self.size() >= 1:
             return self.head.val
         else:
-            return f'List is empty!'
+            return None
 
     def get_last(self):
         if self.size() >= 1:
             return self.pop()
         else:
-            return f'List is empty!'
+            return None
 
     def is_empty(self) -> bool:
         return True if self.size() == 0 else False
 
     def add_all(self, other_list: 'LinkedList') -> list:
-        for elem in other_list:
-            self.add(elem)
+        node = self.head
+        while node.next:
+            node = node.next
+
+        node2 = LinkedList
+        print(node2)
 
     def size(self) -> int:
         count = 0
@@ -150,12 +154,14 @@ class LinkedList:
                 node = node.next
             return count
         else:
-            return f'There is no such element or list is empty!'
+            return None
 
 
-other_list = [11, 12, 13, 14, 15]
+other_list = [1, 3, 4]
 linked_list = LinkedList()
-linked_list.add(100000)
+linked_list.add(1)
+linked_list.add(2)
+linked_list.add(4)
 print(linked_list.size())
 print(linked_list)
-print(linked_list.to_list())
+# print(linked_list)
